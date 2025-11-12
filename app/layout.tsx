@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import { ThemeProvider as MUIThemeProvider, CssBaseline } from "@mui/material";
 import { Roboto } from "next/font/google";
-import theme from "./theme"; // 🎨 Ton thème MUI (light/dark + palette perso)
-import "./globals.css"; // 🧩 Tes styles Tailwind + CSS custom
-import Navbar from "./components/Navbar"; // 🧭 Header global
-import Footer from "./sections/Footer";   // ⚓ Footer global
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import theme from "./theme";
+import "./globals.css";
+import Navbar from "./components/Navbar";
+import Footer from "./sections/Footer";
 
-// --- Importation de la police Roboto via Next.js Fonts API ---
+// --- Police Roboto ---
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
@@ -15,7 +16,7 @@ const roboto = Roboto({
   variable: "--font-roboto",
 });
 
-// --- Métadonnées du site ---
+// --- Métadonnées ---
 export const metadata: Metadata = {
   title: "Portfolio – Andry",
   description: "Développeur Full Stack | React, Next.js, TailwindCSS & MUI",
@@ -28,24 +29,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${roboto.variable}`}>
+    <html lang="fr" className={roboto.variable} suppressHydrationWarning>
       <body className="antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
-        {/* MUI + Next.js App Router intégration */}
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ThemeProvider theme={theme}>
-            {/* Reset global de MUI (marge, typo, couleurs par défaut) */}
-            <CssBaseline />
+        <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+          <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+            <MUIThemeProvider theme={theme}>
+              <CssBaseline />
 
-            {/*  Barre de navigation */}
-            <Navbar />
+              {/* --- Navbar globale --- */}
+              <Navbar />
 
-            {/*  Contenu des pages */}
-            <main className="min-h-screen pt-20 px-4 sm:px-8">{children}</main>
+              {/* --- Contenu des pages --- */}
+              <main className="min-h-screen pt-20 px-4 sm:px-8">
+                {children}
+              </main>
 
-            {/*  Pied de page */}
-            <Footer />
-          </ThemeProvider>
-        </AppRouterCacheProvider>
+              {/* --- Pied de page --- */}
+              <Footer />
+            </MUIThemeProvider>
+          </AppRouterCacheProvider>
+        </NextThemesProvider>
       </body>
     </html>
   );
