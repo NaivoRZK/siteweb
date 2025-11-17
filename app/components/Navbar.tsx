@@ -3,79 +3,105 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sun, Moon } from "lucide-react";
 
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+  if (!mounted) return null;
 
-  if (!mounted) return null; // évite le clignotement du dark mode
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const toggleTheme = () =>
+    setTheme(resolvedTheme === "light" ? "dark" : "light");
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900">
+    <nav className="relative flex justify-between items-center p-4 
+                    bg-slate-900 text-white 
+                    dark:bg-slate-100 dark:text-slate-900">
+      
       {/* Logo */}
       <div className="font-bold text-lg">Mon Portfolio</div>
 
-      {/* Bouton pour basculer clair/sombre */}
+      {/* BOUTON – fond basé UNIQUEMENT sur l’icône */}
       <button
         onClick={toggleTheme}
-        className="p-2 rounded-md hover:bg-slate-800 dark:hover:bg-slate-200 transition"
         aria-label="Toggle dark mode"
+        className={`
+          p-2 rounded-full transition
+
+          ${resolvedTheme === "light"
+            ? "bg-black text-white"     // Moon → fond noir
+            : "bg-yellow-300 text-yellow-900"}  // Sun → fond jaune
+        `}
       >
-        {theme === 'light' ? '🌙' : '☀️'}
+        {resolvedTheme === "light" ? (
+          <Moon className="h-5 w-5" />
+        ) : (
+          <Sun className="h-5 w-5" />
+        )}
       </button>
 
-      {/* Menu hamburger pour mobile */}
-      <div className="lg:hidden">
-        <button
-          onClick={toggleMenu}
-          className="p-2 rounded-md hover:bg-slate-800 dark:hover:bg-slate-200 transition"
-          aria-label="Toggle menu"
-        >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {menuOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
-        </button>
+      {/* Hamburger */}
+      <button
+        onClick={toggleMenu}
+        className="p-2 rounded-md lg:hidden hover:bg-slate-800 dark:hover:bg-slate-200 transition"
+        aria-label="Toggle menu"
+      >
+        <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+
+      {/* Desktop menu */}
+      <div className="hidden lg:flex space-x-6">
+        <Link href="/" className="hover:text-blue-400">Accueil</Link>
+        <Link href="/about" className="hover:text-blue-400">À propos</Link>
+        <Link href="/projects" className="hover:text-blue-400">Projets</Link>
+        <Link href="/contact" className="hover:text-blue-400">Contact</Link>
       </div>
 
-      {/* Liens de navigation */}
-      <div
-        className={`${menuOpen ? 'block' : 'hidden'} lg:flex space-x-4 transition-all duration-300`}
-      >
-        <Link href="/" className="hover:text-blue-400">
-          Accueil
-        </Link>
-        <Link href="/about" className="hover:text-blue-400">
-          À propos
-        </Link>
-        <Link href="/projects" className="hover:text-blue-400">
-          Projets
-        </Link>
-        <Link href="/contact" className="hover:text-blue-400">
-          Contact
-        </Link>
-      </div>
+      {/* Menu mobile */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+            className="fixed top-0 left-0 w-3/4 h-full 
+                       bg-slate-800 text-white 
+                       dark:bg-slate-200 dark:text-slate-900
+                       p-6 flex flex-col space-y-6
+                       z-50 shadow-lg lg:hidden"
+          >
+            <Link href="/" onClick={toggleMenu} className="text-lg hover:text-blue-400">
+              Accueil
+            </Link>
+            <Link href="/about" onClick={toggleMenu} className="text-lg hover:text-blue-400">
+              À propos
+            </Link>
+            <Link href="/projects" onClick={toggleMenu} className="text-lg hover:text-blue-400">
+              Projets
+            </Link>
+            <Link href="/contact" onClick={toggleMenu} className="text-lg hover:text-blue-400">
+              Contact
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </nav>
   );
 }
